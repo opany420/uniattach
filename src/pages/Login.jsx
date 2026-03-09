@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../supabase";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -9,18 +10,23 @@ export default function Login() {
   const [role, setRole] = useState("student");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
       if (role === "student") navigate("/student/dashboard");
       else if (role === "supervisor") navigate("/supervisor/dashboard");
       else if (role === "company") navigate("/company/dashboard");
       else navigate("/admin/dashboard");
-    }, 1500);
+    }
   };
 
   return (
@@ -47,6 +53,11 @@ export default function Login() {
             </button>
           ))}
         </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-4 text-sm">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
