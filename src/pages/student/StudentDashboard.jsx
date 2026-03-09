@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../supabase";
 import { motion } from "framer-motion";
 import {
   GraduationCap, LayoutDashboard, FileText, BookOpen,
   Bell, LogOut, Menu, X, Building2, Clock, CheckCircle,
   AlertCircle, Upload, Star, MapPin, Calendar, ChevronRight
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const sidebarLinks = [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
@@ -51,6 +52,12 @@ export default function StudentDashboard() {
   const [showLogbookForm, setShowLogbookForm] = useState(false);
   const [logbookEntry, setLogbookEntry] = useState({ week: "", activities: "", challenges: "", plans: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => { setUser(data.user); }); }, []);
+  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Student";
+  const fullName = user?.user_metadata?.full_name || "Student";
+  const avatarLetter = firstName[0]?.toUpperCase() || "S";
 
   const handleApply = (id) => {
     if (!appliedIds.includes(id)) setAppliedIds([...appliedIds, id]);
@@ -85,7 +92,7 @@ export default function StudentDashboard() {
         {sidebarOpen && (
           <div className="px-6 py-4 border-b border-blue-800">
             <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg mb-2">J</div>
-            <p className="text-white font-semibold text-sm">John Kamau</p>
+            <p className="text-white font-semibold text-sm">{fullName}</p>
             <p className="text-blue-300 text-xs">KSU/CS/001/2022</p>
             <p className="text-blue-300 text-xs">Computer Science</p>
           </div>
@@ -139,7 +146,7 @@ export default function StudentDashboard() {
           {activePage === "dashboard" && (
             <div>
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">Welcome back, John! 👋</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Welcome back, {firstName}! 👋</h3>
                 <p className="text-gray-500">Here is your attachment progress overview</p>
               </div>
 
